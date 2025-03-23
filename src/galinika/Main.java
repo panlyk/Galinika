@@ -1,3 +1,6 @@
+package galinika;
+
+import galinika.LaunchPage.LaunchPage;
 
 public class Main {
 
