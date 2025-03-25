@@ -90,19 +90,33 @@ public class AddPage {
     private void buttonAction() {
         Substance selectedSubstance = (Substance) substanceComboBox.getSelectedItem();
 
-        if (selectedSubstance == null) return;
+        if (selectedSubstance == null) {
+            JOptionPane.showMessageDialog(frame, "Δεν έχει επιλεγεί συστατικό.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String quantityText = quantityField.getText().trim().replace(",", ".");
+
+        if (quantityText.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Το πεδίο ποσότητας είναι κενό.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         try {
-            float quantity = Float.parseFloat(quantityField.getText().replace(",", "."));
+            float quantity = Float.parseFloat(quantityText);
             float endPrice = quantity * selectedSubstance.getPricePerQuantity();
+
             launchPage.addToTable(new Object[]{
                 selectedSubstance.getName(),
-                quantityField.getText(),
+                quantityField.getText(),  // Show original format (with commas if needed)
                 String.format("%.2f €", endPrice)
             });
+
             frame.dispose();
+
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(frame, "Παρακαλώ εισάγετε αριθμητική ποσότητα.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Παρακαλώ εισάγετε έγκυρη αριθμητική ποσότητα.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }

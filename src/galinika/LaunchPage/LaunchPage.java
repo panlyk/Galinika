@@ -31,7 +31,7 @@ public class LaunchPage {
     JScrollPane scrollPane = new JScrollPane(table);
 
     JLabel restLabel = new JLabel("Άλλο κόστος (€):");
-    JTextField restField = new JTextField();
+    JTextField restField = new JTextField("0");
 
     JButton calculateButton = new JButton("Υπολογισμός συνόλου");
     
@@ -142,7 +142,14 @@ public class LaunchPage {
     }
     
     private void calculateTotal() {
-    	float galenicQuantity = Float.parseFloat(galenicQuantityField.getText().trim().replace(",", "."));
+    	String galenicQuantityString = galenicQuantityField.getText().trim().replace(",", ".");
+    	float galenicQuantity = 0;
+    	if (!galenicQuantityString.isEmpty()) {
+    		galenicQuantity = Float.parseFloat(galenicQuantityField.getText().trim().replace(",", "."));
+    	} else {
+			JOptionPane.showMessageDialog(frame, "Μη έγκυρη ποσότητα Γαληνικού", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+		}
+    	
     	galenicType type = (galenicType) galenicTypeComboBox.getSelectedItem();
     	float total = 0;
     	
@@ -158,7 +165,10 @@ public class LaunchPage {
     	float substancesCost = 0;
     	for (int row = 0; row < tableModel.getRowCount(); row++) {
     	    String priceString = ((String) tableModel.getValueAt(row, 2)).replace("€", "").replace(",", ".").trim();
-    	    substancesCost += Float.parseFloat(priceString);
+    	    if (!priceString.isEmpty()) {
+    	    	substancesCost += Float.parseFloat(priceString);
+    	    }
+    	    
     	}
     	total += substancesCost;
     	
