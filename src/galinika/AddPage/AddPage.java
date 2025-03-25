@@ -2,7 +2,7 @@ package galinika.AddPage;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.Map;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -11,51 +11,47 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
+import gakinika.library.Substance;
 import gakinika.library.SubstanceLibrary;
 import galinika.LaunchPage.LaunchPage;
 import galinika.MainMenu.MainMenu;
 
 public class AddPage {
 
-    // Create frame and menu
-    JFrame frame = new JFrame();
-    MainMenu menu = new MainMenu();
+    // UI
+    private JFrame frame = new JFrame();
+    private MainMenu menu = new MainMenu();
     private LaunchPage launchPage;
-    
-    // Get substance map from CSV
-    Map<String, Double> substancesMap = SubstanceLibrary.loadFromFile("substances.csv");
-    // Convert keys to a String[] for the combo box
-    String[] substanceNames = substancesMap.keySet().toArray(new String[0]);
 
-    // Title label
-    JLabel titleLabel = new JLabel("Προσθήκη συστατικού");
+    // Substances
+    private List<Substance> substancesList;
+    private JComboBox<Substance> substanceComboBox;
 
-    // Substance label & combo box
-    JLabel substanceLabel = new JLabel("Συστατικό");
-    JComboBox<String> substanceComboBox = new JComboBox<>(substanceNames);
-
-    // Quantity field & label
-    JTextField quantityField = new JTextField();
-    JLabel quantityLabel = new JLabel("Ποσότητα");
-    
-    // Confirm button
-    JButton confirmButton = new JButton("Επιβεβαίωση");
-
-    // Font
-    Font labelFont = new Font("Arial", Font.PLAIN, 14);
+    // UI elements
+    private JLabel titleLabel = new JLabel("Προσθήκη συστατικού");
+    private JLabel substanceLabel = new JLabel("Συστατικό");
+    private JLabel quantityLabel = new JLabel("Ποσότητα");
+    private JTextField quantityField = new JTextField();
+    private JButton confirmButton = new JButton("Επιβεβαίωση");
+    private Font labelFont = new Font("Arial", Font.PLAIN, 14);
 
     public AddPage(LaunchPage page) {
-    	
-    	// Launch page reference
-    	launchPage = page;
-    	
+        this.launchPage = page;
+        
+        this.launchPage = page;
+
+        // Load substances from persistent file and sort alphabetically
+        substancesList = SubstanceLibrary.loadFromFile();
+        substancesList.sort((s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+
+        // Initialize combo box
+        substanceComboBox = new JComboBox<>(substancesList.toArray(new Substance[0]));
+
         // Frame setup
         frame.setSize(360, 360);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLayout(null);
         frame.getContentPane().setBackground(Color.WHITE);
-
-        // MenuBar
         frame.setJMenuBar(menu.createMenu(frame));
 
         // Title
@@ -63,55 +59,50 @@ public class AddPage {
         titleLabel.setBounds(30, 20, 300, 30);
         frame.add(titleLabel);
 
-        // Substance label
+        // Substance label and combo box
         substanceLabel.setFont(labelFont);
         substanceLabel.setBounds(30, 70, 120, 25);
         frame.add(substanceLabel);
 
-        // Substance combo box
-        substanceComboBox.setBounds(130, 70, 120, 25);
+        substanceComboBox.setBounds(130, 70, 160, 25);
         frame.add(substanceComboBox);
 
-        // Quantity label
+        // Quantity
         quantityLabel.setFont(labelFont);
         quantityLabel.setBounds(30, 110, 120, 25);
         frame.add(quantityLabel);
 
-        // Quantity field
         quantityField.setBounds(130, 110, 120, 25);
         frame.add(quantityField);
-        
-        // Confirm Button
+
+        // Confirm button
         confirmButton.setBounds(30, 150, 120, 25);
         confirmButton.addActionListener(e -> buttonAction());
         frame.add(confirmButton);
 
-        // Show frame
         frame.setVisible(true);
-        
     }
-    
-    public boolean isOpen() {
-    	return frame.isActive();
-    }
-    
-    private void buttonAction() { 
-    	String selectedSubstance = (String) substanceComboBox.getSelectedItem();
-    	Double pricePerQuantity = substancesMap.get(selectedSubstance);
-    	try {
-    	    double quantity = Double.parseDouble(quantityField.getText());
-    	    // Now you can use quantity in calculations
-    	    Double endPrice = quantity * pricePerQuantity;
-    	    launchPage.addToTable(new Object[] {substanceComboBox.getSelectedItem().toString(),quantityField.getText(), endPrice.toString()+" €"});
-    	} catch (NumberFormatException e) {
-    	    // Handle invalid input (e.g., user typed "abc")
-    	    JOptionPane.showMessageDialog(frame, "Παρακαλώ εισάγετε αριθμητική ποσότητα.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
-    	}
-    	frame.dispose();
-    	
-    	
-    }
-    
-}    
-    
 
+    public boolean isOpen() {
+        return frame.isActive();
+    }
+
+    private void buttonAction() {
+        Substance selectedSubstance = (Substance) substanceComboBox.getSelectedItem();
+
+        if (selectedSubstance == null) return;
+
+        try {
+            float quantity = Float.parseFloat(quantityField.getText().replace(",", "."));
+            float endPrice = quantity * selectedSubstance.getPricePerQuantity();
+            launchPage.addToTable(new Object[]{
+                selectedSubstance.getName(),
+                quantityField.getText(),
+                String.format("%.2f €", endPrice)
+            });
+            frame.dispose();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Παρακαλώ εισάγετε αριθμητική ποσότητα.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}

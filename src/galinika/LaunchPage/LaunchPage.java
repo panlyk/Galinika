@@ -1,6 +1,8 @@
 package galinika.LaunchPage;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import gakinika.library.TypesLibrary.galenicType;
 import galinika.AddPage.AddPage;
 import galinika.MainMenu.MainMenu;
 import java.awt.*;
@@ -13,7 +15,8 @@ public class LaunchPage {
     JLabel titleLabel = new JLabel("Δημιουργία Γαληνικού");
 
     JLabel galenicTypeLabel = new JLabel("Τύπος Γαληνικού:");
-    JComboBox<String> galenicTypeComboBox = new JComboBox<>(new String[]{"Κρέμα", "Αλοιφή", "Διάλυμα"});
+    
+    JComboBox<galenicType> galenicTypeComboBox = new JComboBox<>(galenicType.values());
 
     JLabel galenicQuantityLabel = new JLabel("Ποσότητα:");
     JTextField galenicQuantityField = new JTextField();
@@ -114,6 +117,7 @@ public class LaunchPage {
         calculateButton.setBackground(new Color(40, 167, 69));
         calculateButton.setForeground(Color.WHITE);
         calculateButton.setFocusPainted(false);
+        calculateButton.addActionListener(e -> calculateTotal());
         frame.add(calculateButton);
         
         // Total Price Label - emphasized
@@ -135,5 +139,54 @@ public class LaunchPage {
 
     public void addToTable(Object[] rowdata) {
         tableModel.addRow(rowdata);
+    }
+    
+    private void calculateTotal() {
+    	float galenicQuantity = Float.parseFloat(galenicQuantityField.getText().trim().replace(",", "."));
+    	galenicType type = (galenicType) galenicTypeComboBox.getSelectedItem();
+    	float total = 0;
+    	
+    	//calculate quantity cost
+    	try {float quantityCost = calculateTieredCost(type.getMinimumQuantity(), type.getDivisionQuantity(), type.getMinimumCost(), type.getCostIncrement(), galenicQuantity);
+    	total += quantityCost;}
+    	catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "Παρακαλώ εισάγετε έναν έγκυρο αριθμό στο πεδίο 'Ποσότητα'.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+    	
+    	//calculate substance cost
+    	float substancesCost = 0;
+    	for (int row = 0; row < tableModel.getRowCount(); row++) {
+    	    String priceString = ((String) tableModel.getValueAt(row, 2)).replace("€", "").replace(",", ".").trim();
+    	    substancesCost += Float.parseFloat(priceString);
+    	}
+    	total += substancesCost;
+    	
+    	//calculate other costs
+    	try {float otherCost = Float.parseFloat(restField.getText().replace(",", ".")); 
+    	total += otherCost;}
+    	catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "Παρακαλώ εισάγετε έναν έγκυρο αριθμό στο πεδίο 'Λοιπά έξοδα'.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		//change the label
+		totalPriceJLabel.setText (total + " €");
+    	
+    	
+    }
+    
+    private float calculateTieredCost (float minimumQuantity, float divisionQuantity, float minimumCost, float costIncrement, float quantity)
+    {
+    	float quantityOverMinimum = (quantity-minimumQuantity);
+    	if (quantityOverMinimum <= 0) {
+    		return minimumCost;
+    	} else if (Math.abs(quantityOverMinimum % divisionQuantity) < 0.001f) {
+    		
+    		return minimumCost + (quantityOverMinimum/divisionQuantity)*costIncrement;
+    	} else {
+    		int times = (int) (quantityOverMinimum / divisionQuantity);
+    		return minimumCost + (times+1) * costIncrement;
+    	}
     }
 }
