@@ -34,6 +34,7 @@ public class AddPage {
     private JTextField quantityField = new JTextField();
     private JButton confirmButton = new JButton("Επιβεβαίωση");
     private Font labelFont = new Font("Arial", Font.PLAIN, 14);
+    JComboBox<String> galenicQuantityTypesBox = new JComboBox<>(new String[]{"gr", "ml"});
 
     public AddPage(LaunchPage page) {
         this.launchPage = page;
@@ -69,10 +70,13 @@ public class AddPage {
 
         // Quantity
         quantityLabel.setFont(labelFont);
-        quantityLabel.setBounds(30, 110, 120, 25);
+        quantityLabel.setBounds(30, 110, 80, 25);
         frame.add(quantityLabel);
+        
+        galenicQuantityTypesBox.setBounds(235,110,55,25);
+        frame.add(galenicQuantityTypesBox);
 
-        quantityField.setBounds(130, 110, 120, 25);
+        quantityField.setBounds(130, 110, 100, 25);
         frame.add(quantityField);
 
         // Confirm button
@@ -107,8 +111,8 @@ public class AddPage {
             float endPrice = quantity * selectedSubstance.getPricePerQuantity();
 
             launchPage.addToTable(new Object[]{
-                selectedSubstance.getName(),
-                quantityField.getText(),  // Show original format (with commas if needed)
+                selectedSubstance.getName(), 
+                new String(quantityField.getText()+" "+galenicQuantityTypesBox.getSelectedItem()),  // Show original format (with commas if needed)
                 String.format("%.2f €", endPrice)
             });
 

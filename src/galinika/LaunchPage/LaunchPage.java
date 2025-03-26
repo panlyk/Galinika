@@ -108,12 +108,12 @@ public class LaunchPage {
         restLabel.setBounds(30, 340, 150, 25);
         frame.add(restLabel);
 
-        restField.setBounds(190, 340, 100, 25);
+        restField.setBounds(145, 340, 100, 25);
         frame.add(restField);
 
         // Calculate Button
         calculateButton.setFont(buttonFont);
-        calculateButton.setBounds(30, 380, 260, 30);
+        calculateButton.setBounds(30, 380, 300, 30);
         calculateButton.setBackground(new Color(40, 167, 69));
         calculateButton.setForeground(Color.WHITE);
         calculateButton.setFocusPainted(false);
@@ -139,6 +139,22 @@ public class LaunchPage {
 
     public void addToTable(Object[] rowdata) {
         tableModel.addRow(rowdata);
+    }
+    
+    
+    
+    private float calculateTieredCost (float minimumQuantity, float divisionQuantity, float minimumCost, float costIncrement, float quantity)
+    {
+    	float quantityOverMinimum = (quantity-minimumQuantity);
+    	if (quantityOverMinimum <= 0) {
+    		return minimumCost;
+    	} else if (Math.abs(quantityOverMinimum % divisionQuantity) < 0.001f) {
+    		
+    		return minimumCost + (quantityOverMinimum/divisionQuantity)*costIncrement;
+    	} else {
+    		int times = (int) (quantityOverMinimum / divisionQuantity);
+    		return minimumCost + (times+1) * costIncrement;
+    	}
     }
     
     private void calculateTotal() {
@@ -176,27 +192,11 @@ public class LaunchPage {
     	try {float otherCost = Float.parseFloat(restField.getText().replace(",", ".")); 
     	total += otherCost;}
     	catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "Παρακαλώ εισάγετε έναν έγκυρο αριθμό στο πεδίο 'Λοιπά έξοδα'.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Παρακαλώ εισάγετε έναν έγκυρο αριθμό στο πεδίο 'Άλλο Κόστος'.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		//change the label
-		totalPriceJLabel.setText (total + " €");
-    	
-    	
-    }
-    
-    private float calculateTieredCost (float minimumQuantity, float divisionQuantity, float minimumCost, float costIncrement, float quantity)
-    {
-    	float quantityOverMinimum = (quantity-minimumQuantity);
-    	if (quantityOverMinimum <= 0) {
-    		return minimumCost;
-    	} else if (Math.abs(quantityOverMinimum % divisionQuantity) < 0.001f) {
-    		
-    		return minimumCost + (quantityOverMinimum/divisionQuantity)*costIncrement;
-    	} else {
-    		int times = (int) (quantityOverMinimum / divisionQuantity);
-    		return minimumCost + (times+1) * costIncrement;
-    	}
+		totalPriceJLabel.setText (String.format("%.2f €", total));
     }
 }

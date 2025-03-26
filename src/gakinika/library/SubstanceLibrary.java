@@ -21,7 +21,7 @@ public class SubstanceLibrary {
     JButton addButton = new JButton("Προσθήκη");
     JButton deleteButton = new JButton("Διαγραφή");
 
-    private final String[] columnNames = {"Όνομα", "Τιμή ανά μονάδα (€)"};
+    private final String[] columnNames = {"Όνομα", "Τιμή ανά g/ml (€)"};
 
     public SubstanceLibrary() {
         frame.setSize(400, 400);
